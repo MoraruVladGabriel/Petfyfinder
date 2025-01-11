@@ -1,0 +1,61 @@
+{% extends "core/base.html" %}
+
+{% block title %}Conversation{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-3xl">Conversation</h1>
+<div id="chat-log" class="space-y-6">
+    {% for message in conversation.messages.all %}
+    <div class="p-6 flex bg-gray-100 rounded-xl">
+        <div>
+            <p class="mb-4"><strong>{{ message.created_by.username }}</strong> @ {{ message.created_at }}</p>
+            <p>{{ message.content }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<form id="chat-message-form" method="post" class="mt-6">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button id="submit-button" type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Send</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const roomName = "{{ conversation.id }}";
+        const username = "{{ request.user.username }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/conversation/' + roomName + '/'
+        );
+    
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatlog = document.getElementById('chat-log');
+            if (chatlog) {
+                const newMessage = document.createElement('div');
+                newMessage.className = 'p-6 flex bg-gray-100 rounded-xl';
+                newMessage.innerHTML = '<div><p class="mb-4"><strong>' + data.username + '</strong> @ now</p><p>' + data.message + '</p></div>';
+                chatlog.appendChild(newMessage);
+            } else {
+                console.error('Element with ID "chat-log" not found');
+            }
+        };
+    
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+    
+        document.getElementById('chat-message-form').onsubmit = function(e) {
+            e.preventDefault();
+            const messageInputDom = document.getElementById('id_content');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': username,
+            }));
+            messageInputDom.value = '';
+        };
+    });
+</script>
+{% endblock %}

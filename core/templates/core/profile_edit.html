@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
+    <h1 class="text-3xl font-bold mb-6 text-center">Edit Profile</h1>
+    
+    <form method="post" action="{% url 'core:profile_edit' %}">
+        {% csrf_token %}
+        
+        <div class="mb-4">
+            <label for="username" class="block text-gray-700 font-semibold">Username:</label>
+            <input type="text" id="username" name="username" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" value="{{ request.user.username }}" required>
+        </div>
+        
+        <div class="mb-4">
+            <label for="email" class="block text-gray-700 font-semibold">Email:</label>
+            <input type="email" id="email" name="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" value="{{ request.user.email }}" required>
+        </div>
+        
+        <div class="mb-4">
+            <label for="location" class="block text-gray-700 font-semibold">Location:</label>
+            <input type="text" id="location" name="location" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" value="{{ profile.location }}" required>
+        </div>
+        
+        <div class="text-center">
+            <button type="submit" class="px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg hover:bg-teal-700">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
